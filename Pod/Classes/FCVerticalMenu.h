@@ -47,7 +47,7 @@
 @property (assign, readwrite, nonatomic) CGFloat backgroundAlpha;
 @property (strong, readwrite, nonatomic) UIColor *backgroundColor;
 
-
+@property (nonatomic) NSUInteger selectItemAtIndex;
 @property (strong, readwrite, nonatomic) UIFont *font;
 @property (strong, readwrite, nonatomic) UIColor *textColor;
 @property (strong, readwrite, nonatomic) UIColor *textShadowColor;
@@ -79,7 +79,6 @@
 
 //Methods
 //
-- (id)initWithItems:(NSArray*)itemsList;
 - (void)showFromNavigationBar:(UINavigationBar*)navigationBar inView:(UIView *)view;
 - (void)showFromRect:(CGRect)rect inView:(UIView *)view;
 - (void)dismissWithCompletionBlock:(void (^)(void))completion;

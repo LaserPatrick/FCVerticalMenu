@@ -76,7 +76,7 @@
         _menuCollection.delegate = self;
         _menuCollection.dataSource = self;
         
-        
+        _selectItemAtIndex = 0;
     }
     return self;
 }
@@ -89,33 +89,30 @@
  *  @param itemsList an array of object FCVerticalMenuItem
  *
  */
-- (id)initWithItems:(NSArray*)itemsList
-{
-    self = [self init];
-    if (self) {
-        self.items = itemsList;
-        for (FCVerticalMenuItem *anItem in self.items) {
-            //do something with the item
-            NSInteger index = [self.items indexOfObject:anItem];
-            
-            anItem.index = index;
-            
-            anItem.font = _font;
-            anItem.textColor = _textColor;
-            anItem.textShadowColor = _textShadowColor;
-            anItem.textAlignment = _textAlignment;
-            anItem.highlightedBackgroundColor = _highlightedBackgroundColor;
-            anItem.highlightedTextColor = _highlightedTextColor;
-            anItem.highlightedTextShadowColor = _highlightedTextShadowColor;
-            anItem.borderWidth = _borderWidth;
-            anItem.borderColor = _borderColor;
-            anItem.imageTintColor = _imageTintColor;
-            anItem.highlightedImageTintColor = _highlightedImageTintColor;
 
-        }
+-(void)setItems:(NSArray *)items
+{
+    _items = items;
+    for (FCVerticalMenuItem *anItem in self.items) {
+        //do something with the item
+        NSInteger index = [self.items indexOfObject:anItem];
+        
+        anItem.index = index;
+        
+        anItem.font = _font;
+        anItem.textColor = _textColor;
+        anItem.textShadowColor = _textShadowColor;
+        anItem.textAlignment = _textAlignment;
+        anItem.highlightedBackgroundColor = _highlightedBackgroundColor;
+        anItem.highlightedTextColor = _highlightedTextColor;
+        anItem.highlightedTextShadowColor = _highlightedTextShadowColor;
+        anItem.borderWidth = _borderWidth;
+        anItem.borderColor = _borderColor;
+        anItem.imageTintColor = _imageTintColor;
+        anItem.highlightedImageTintColor = _highlightedImageTintColor;
+        
     }
-    
-    return self;
+    [self.menuCollection reloadData];
 }
 
 /**
@@ -142,6 +139,9 @@
     if (self.appearsBehindNavigationBar) {
         [view bringSubviewToFront:navigationBar];
     }
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self collectionView:self.menuCollection didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:self.selectItemAtIndex inSection:0]];
+    });
 }
 
 /**
@@ -338,6 +338,8 @@
                          if (completion) {
                              completion();
                          }
+                         [self.menuCollection selectItemAtIndexPath:[NSIndexPath indexPathForRow:self.selectItemAtIndex inSection:0] animated:true scrollPosition:UICollectionViewScrollPositionTop];
+                         
                      }];
 }
 
@@ -419,13 +421,13 @@
 #pragma mark - CollectionView Delegate protocol
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
+    for (NSIndexPath *index in [collectionView indexPathsForVisibleItems]){
+        [self collectionView:collectionView didDeselectItemAtIndexPath:index];
+    }
     FCVerticalMenuItemCollectionViewCell *cell = (FCVerticalMenuItemCollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
     
-    if ([cell isHighlighted])
-        [self collectionView:collectionView didDeselectItemAtIndexPath:indexPath];
-    else
-        [cell setHighlighted:YES];
-  
+    [cell setHighlighted:YES];
+    
     if (cell.theMenuItem.actionBlock) {
         cell.theMenuItem.actionBlock();
     }
@@ -436,7 +438,7 @@
             self.bounce = YES;
         }];
     }
-
+    self.selectItemAtIndex = indexPath.row;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(NSIndexPath *)indexPath
