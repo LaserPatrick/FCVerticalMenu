@@ -139,9 +139,19 @@
     if (self.appearsBehindNavigationBar) {
         [view bringSubviewToFront:navigationBar];
     }
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self collectionView:self.menuCollection didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:self.selectItemAtIndex inSection:0]];
-    });
+    [self loadHighlightedCell];
+}
+
+-(void)loadHighlightedCell{
+    
+    FCVerticalMenuItemCollectionViewCell *cell = (FCVerticalMenuItemCollectionViewCell*)[self.menuCollection cellForItemAtIndexPath:[NSIndexPath indexPathForRow:self.selectItemAtIndex inSection:0]];
+    
+    if (cell == nil) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self loadHighlightedCell];
+        });
+    }else
+        [cell setHighlighted:true];
 }
 
 /**
@@ -338,7 +348,6 @@
                          if (completion) {
                              completion();
                          }
-                         [self.menuCollection selectItemAtIndexPath:[NSIndexPath indexPathForRow:self.selectItemAtIndex inSection:0] animated:true scrollPosition:UICollectionViewScrollPositionTop];
                          
                      }];
 }
@@ -426,6 +435,7 @@
     }
     FCVerticalMenuItemCollectionViewCell *cell = (FCVerticalMenuItemCollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
     
+    self.selectItemAtIndex = indexPath.row;
     [cell setHighlighted:YES];
     
     if (cell.theMenuItem.actionBlock) {
@@ -438,7 +448,6 @@
             self.bounce = YES;
         }];
     }
-    self.selectItemAtIndex = indexPath.row;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(NSIndexPath *)indexPath
