@@ -321,7 +321,11 @@
 
 - (CGFloat)navigationBarOffset
 {
-    return self.appearsBehindNavigationBar? 64.0f : 0.0f;
+    CGFloat topSafeArea = 20.0f;
+    if (@available(iOS 11.0, *)) {
+        topSafeArea = [[[[[[UIApplication sharedApplication] delegate] window] rootViewController] view] safeAreaInsets].top;
+    }
+    return self.appearsBehindNavigationBar? (44.0f + topSafeArea) : 0.0f;
 }
 
 
